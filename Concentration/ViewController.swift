@@ -47,8 +47,13 @@ class ViewController: UIViewController {
     
     
     func checkIfMatched(){
+        print("Opened: \(openedSquares.count)")
+        print("Matched: \(matchedSquaresID.count)")
+        
         if matchedSquaresID.count < 6{
             if openedSquares.count > 2{
+                removeFirstOpenedSquare()
+            }else if openedSquares.count == 2{
                 if openedSquares.first?.color == openedSquares.last?.color{
                     if let color = openedSquares.first?.color{
                         if !scoredColors.contains(color){
@@ -57,12 +62,15 @@ class ViewController: UIViewController {
                                 matchedSquaresID.append((id1, id2))
                                 score += 10
                                 scoreLabel.text = "\(score)"
+                                print("Opened: \(openedSquares.count)")
+                                print("Matched: \(matchedSquaresID.count)")
                             }
                         }
                     }
                     
                 }
                 removeFirstOpenedSquare()
+                print("Opened: \(openedSquares.count)")
             }
         }else{
             DispatchQueue.main.async{
@@ -142,6 +150,7 @@ class ViewController: UIViewController {
     func resetSquares(squares: [Square]){
         self.checkIfMatched()
     }
+    
     
 }
 
