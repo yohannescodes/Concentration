@@ -11,219 +11,158 @@ class ViewController: UIViewController {
     
     
     @IBOutlet var buttons: [UIButton]!
-  
+    
     @IBOutlet weak var scoreLabel: UILabel!
     var flippedButtons = 0
     var flippedButtonsIndex: [Int] = []
     var score = 0
+    var levelCombo = [UIColor]()
+    var squares = [Square]()
+    var opened = 0
+    var openedSquares = [Square]()
+    var scoredColors = [UIColor]()
+    var matchedSquaresID = [(Int, Int)]()
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        levelCombo = self.randomizeColors()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         //setUpButtons()
-        setupButtons()
+        levelCombo = randomizeColors()
+        setSquares()
     }
     
-    func setupButtons(){
-        for button in buttons{
-            button.layer.borderWidth = 1
-            button.layer.borderColor = CGColor(red: 0, green: 0, blue: 0, alpha: 0.7)
+    
+    func setSquares(){
+        for i in 0...11{
+            let square = Square(id: i, color: levelCombo[i], button: buttons[i])
+            square.button.layer.borderColor = UIColor.black.cgColor
+            square.button.layer.borderWidth = 0.6
+            squares.append(square)
         }
     }
-
-    func resetButtons(){
-        for button in buttons{
-            button.layer.backgroundColor =  CGColor(red: 250, green: 250, blue: 250, alpha: 1)
-        }
-        flippedButtons = 0
-        flippedButtonsIndex = []
-    }
+    
     
     func checkIfMatched(){
+        print("Opened: \(openedSquares.count)")
+        print("Matched: \(matchedSquaresID.count)")
         
-        if(((flippedButtonsIndex[0] == 1) && (flippedButtonsIndex[1] == 6)) || ((flippedButtonsIndex[0] == 6) && (flippedButtonsIndex[1] == 1))){
-            score += 10
-            scoreLabel.text = "\(score)"
-        }
-        else if(((flippedButtonsIndex[0] == 2) && (flippedButtonsIndex[1] == 7)) || ((flippedButtonsIndex[0] == 7) && (flippedButtonsIndex[1] == 2))){
-            score += 10
-            scoreLabel.text = "\(score)"
-        }
-        else if(((flippedButtonsIndex[0] == 3) && (flippedButtonsIndex[1] == 4)) || ((flippedButtonsIndex[0] == 4) && (flippedButtonsIndex[1] == 3))){
-            score += 10
-            scoreLabel.text = "\(score)"
-        }
-        else if(((flippedButtonsIndex[0] == 5) && (flippedButtonsIndex[1] == 8)) || ((flippedButtonsIndex[0] == 8) && (flippedButtonsIndex[1] == 5))){
-            score += 10
-            scoreLabel.text = "\(score)"
-        }
-        if(score == 40){
-            let alert = UIAlertController(title: "Congrats", message: "You got every match.", preferredStyle: .alert)
-            let okAction = UIAlertAction(title: "Ok", style: .default) { okAction in
-                alert.resignFirstResponder()
+        if matchedSquaresID.count < 6{
+            if openedSquares.count > 2{
+                removeFirstOpenedSquare()
+            }else if openedSquares.count == 2{
+                if openedSquares.first?.color == openedSquares.last?.color{
+                    if let color = openedSquares.first?.color{
+                        if !scoredColors.contains(color){
+                            if let id1 = openedSquares.first?.id, let id2 = openedSquares.last?.id {
+                                scoredColors.append(color)
+                                matchedSquaresID.append((id1, id2))
+                                score += 10
+                                scoreLabel.text = "\(score)"
+                                print("Opened: \(openedSquares.count)")
+                                print("Matched: \(matchedSquaresID.count)")
+                            }
+                        }
+                    }
+                    
+                }
+                removeFirstOpenedSquare()
+                print("Opened: \(openedSquares.count)")
             }
-            alert.addAction(okAction)
-            present(alert, animated: true)
-        }
+        }else{
+            DispatchQueue.main.async{
+                let alert = UIAlertController(title: "Woooo 🏆", message: "You scored 60/60.", preferredStyle: .alert)
+                let alertAction = UIAlertAction(title: "Ok", style: .cancel)
+                
+                alert.addAction(alertAction)
+                self.present(alert, animated: true)
+            }}
+    }
+    
+    func removeFirstOpenedSquare(){
+        openedSquares.first?.button.backgroundColor = UIColor.white
+        openedSquares.removeFirst()
     }
     
     @IBAction func button1Flipped(){
-        
-        if flippedButtons < 2{
-            buttons[0].layer.backgroundColor = CGColor(red: 0, green: 0, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(1)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
-        else{
-            resetButtons()
-            buttons[0].layer.backgroundColor = CGColor(red: 0, green: 0, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(1)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
+        flipColor(square: squares[0])
     }
     @IBAction func button2Flipped(){
-        if flippedButtons < 2 {
-            buttons[1].layer.backgroundColor = CGColor(red: 250, green: 0, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(2)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
-        else{
-            resetButtons()
-            buttons[1].layer.backgroundColor = CGColor(red: 250, green: 0, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(2)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
+        flipColor(square: squares[1])
     }
     @IBAction func button3Flipped(){
-
-        if flippedButtons < 2{
-            buttons[2].layer.backgroundColor = CGColor(red: 0, green: 250, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(3)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
-        else{
-            resetButtons()
-            buttons[2].layer.backgroundColor = CGColor(red: 0, green: 250, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(3)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-            
-        }
+        flipColor(square: squares[2])
     }
     @IBAction func button4Flipped(){
-
-        if flippedButtons < 2{
-            buttons[3].layer.backgroundColor = CGColor(red: 0, green: 250, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(4)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
-        else{
-            resetButtons()
-            buttons[3].layer.backgroundColor = CGColor(red: 0, green: 250, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(4)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
+        flipColor(square: squares[3])
+        
     }
     @IBAction func button5Flipped(){
-
-        if flippedButtons < 2{
-            buttons[4].layer.backgroundColor = CGColor(red: 0, green: 0, blue: 250, alpha: 1)
-            flippedButtonsIndex.append(5)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
-        else{
-            resetButtons()
-            buttons[4].layer.backgroundColor = CGColor(red: 0, green: 0, blue: 250, alpha: 1)
-            flippedButtonsIndex.append(5)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
+        flipColor(square: squares[4])
+        
     }
     @IBAction func button6Flipped(){
+        flipColor(square: squares[5])
         
-        if flippedButtons < 2 {
-            
-            buttons[5].layer.backgroundColor = CGColor(red: 0, green: 0, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(6)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
-        else{
-            resetButtons()
-            buttons[5].layer.backgroundColor = CGColor(red: 0, green: 0, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(6)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
     }
     @IBAction func button7Flipped(){
-        if flippedButtons < 2{
-            buttons[6].layer.backgroundColor = CGColor(red: 250, green: 0, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(7)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
-        else{
-            resetButtons()
-            buttons[6].layer.backgroundColor = CGColor(red: 250, green: 0, blue: 0, alpha: 1)
-            flippedButtonsIndex.append(7)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
+        flipColor(square: squares[6])
     }
     
     @IBAction func button8Flipped(){
-        if flippedButtons < 2 {
-            buttons[7].layer.backgroundColor = CGColor(red: 0, green: 0, blue: 250, alpha: 1)
-            flippedButtonsIndex.append(8)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
-        else{
-            resetButtons()
-            buttons[7].layer.backgroundColor = CGColor(red: 0, green: 0, blue: 250, alpha: 1)
-            flippedButtonsIndex.append(8)
-            flippedButtons += 1
-            if(flippedButtonsIndex.count == 2){
-                checkIfMatched()
-            }
-        }
+        flipColor(square: squares[7])
+    }
+    
+    @IBAction func button9Flipped(){
+        flipColor(square: squares[8])
+    }
+    
+    @IBAction func button10Flipped(){
+        flipColor(square: squares[9])
+    }
+    
+    @IBAction func button11Flipped(){
+        flipColor(square: squares[10])
+    }
+    
+    @IBAction func button12Flipped(){
+        flipColor(square: squares[11])
+    }
+    
+    
+    
+    func randomizeColors() -> [UIColor] {
+        let colors = [UIColor.black, UIColor.gray, UIColor.green, UIColor.yellow, UIColor.red, UIColor.red, UIColor.blue, UIColor.blue, UIColor.yellow, UIColor.black, UIColor.green, UIColor.gray]
+        
+        let shuffledColors = colors.shuffled()
+        return shuffledColors
+    }
+    
+    func flipColor(square: Square){
+        square.button.backgroundColor = square.color
+        openedSquares.append(square)
+        resetSquares(squares: squares)
+    }
+    
+    func resetSquares(squares: [Square]){
+        self.checkIfMatched()
+    }
+    
+    
+}
+
+
+struct Square{
+    var id: Int
+    var color: UIColor
+    var button: UIButton
+    
+    init(id: Int, color: UIColor, button: UIButton) {
+        self.id = id
+        self.color = color
+        self.button = button
     }
 }
