@@ -11,18 +11,17 @@ class ViewController: UIViewController {
     
     
     @IBOutlet var buttons: [UIButton]!
-  
+    
     @IBOutlet weak var scoreLabel: UILabel!
     var flippedButtons = 0
     var flippedButtonsIndex: [Int] = []
     var score = 0
     var levelCombo = [UIColor]()
     var squares = [Square]()
-    var matchedSquares = [Square]()
     var opened = 0
     var openedSquares = [Square]()
-    let scoreColors = [UIColor.black, UIColor.gray, UIColor.red, UIColor.yellow, UIColor.green]
-    var matchedColors = [UIColor]()
+    var scoredColors = [UIColor]()
+    var matchedSquaresID = [(Int, Int)]()
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -39,24 +38,29 @@ class ViewController: UIViewController {
     
     func setSquares(){
         for i in 0...11{
-            let square = Square(color: levelCombo[i], button: buttons[i])
+            let square = Square(id: i, color: levelCombo[i], button: buttons[i])
             square.button.layer.borderColor = UIColor.black.cgColor
             square.button.layer.borderWidth = 0.6
             squares.append(square)
         }
     }
-
+    
     
     func checkIfMatched(){
-        if matchedColors.count < 6{
+        if matchedSquaresID.count < 6{
             if openedSquares.count > 2{
                 if openedSquares.first?.color == openedSquares.last?.color{
-                    score += 10
                     if let color = openedSquares.first?.color{
-                        matchedColors.append(color)
+                        if !scoredColors.contains(color){
+                            if let id1 = openedSquares.first?.id, let id2 = openedSquares.last?.id {
+                                scoredColors.append(color)
+                                matchedSquaresID.append((id1, id2))
+                                score += 10
+                                scoreLabel.text = "\(score)"
+                            }
+                        }
                     }
-                    removeFirstOpenedSquare()
-                    scoreLabel.text = "\(score)"
+                    
                 }
                 removeFirstOpenedSquare()
             }
@@ -86,15 +90,15 @@ class ViewController: UIViewController {
     }
     @IBAction func button4Flipped(){
         flipColor(square: squares[3])
-      
+        
     }
     @IBAction func button5Flipped(){
         flipColor(square: squares[4])
-    
+        
     }
     @IBAction func button6Flipped(){
         flipColor(square: squares[5])
-    
+        
     }
     @IBAction func button7Flipped(){
         flipColor(square: squares[6])
@@ -138,15 +142,17 @@ class ViewController: UIViewController {
     func resetSquares(squares: [Square]){
         self.checkIfMatched()
     }
-   
+    
 }
 
 
 struct Square{
+    var id: Int
     var color: UIColor
     var button: UIButton
     
-    init(color: UIColor, button: UIButton) {
+    init(id: Int, color: UIColor, button: UIButton) {
+        self.id = id
         self.color = color
         self.button = button
     }
