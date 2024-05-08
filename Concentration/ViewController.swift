@@ -20,6 +20,11 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var restartBtn: UIButton!
     
+    @IBOutlet weak var statusLabel: UILabel!
+    @IBOutlet weak var rankLabel: UILabel!
+    
+    @IBOutlet weak var levelSwitch: UISwitch!
+    
     var score = 0
     var levelCombo = [UIColor]()
     var squares = [Square]()
@@ -27,6 +32,12 @@ class ViewController: UIViewController {
     var scoredColors = [UIColor]()
     var matchedSquaresID = [(Int, Int)]()
     var trials = 0
+    var highScore = 0
+    var rank = ""
+    var level =  Level.easy
+    
+    let hardMode = [3, 5, 11, 15, 17, 13, 16, 20, 27]
+    let easyMode = [6, 12, 26, 36, 42, 36, 44, 54, 70]
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -35,15 +46,19 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //setUpButtons()
-        setSquares()
+        adjustLevel()
     }
     
     
     func setSquares(){
+        statusLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        statusLabel.numberOfLines = 0
+        statusLabel.textAlignment = .left
+        statusLabel.text = "By the King's decree, let the trial of skill commence!"
+        rank = highScore > 0 ? Rank.kid.rawValue : Rank.noob.rawValue
         restartBtn.tintColor = .black
         levelCombo = randomizeColors()
-        let highScore = UserDefaults.standard.integer(forKey: "highScore")
+        highScore = UserDefaults.standard.integer(forKey: "highScore")
         highScoreLabel.text = "\(highScore)"
         for i in 0...11{
             let square = Square(id: i, color: levelCombo[i], button: buttons[i])
@@ -55,9 +70,9 @@ class ViewController: UIViewController {
     
     
     func entertainWinner() {
-        self.setHighScore(trials: trials)
+        self.setHighScore(trials: trials, rank: rank)
         DispatchQueue.main.async{
-            let alert = UIAlertController(title: "Woooo 🏆", message: "You scored 60/60.", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Woooo 🏆", message: "Congratulations, \(self.rank) you scored 60/60.", preferredStyle: .alert)
             let alertAction = UIAlertAction(title: "New Game", style: .default) { _ in
                 
                 self.confirmRestart()
@@ -81,7 +96,8 @@ class ViewController: UIViewController {
                                 matchedSquaresID.append((id1, id2))
                                 score += 10
                                 scoreLabel.text = "\(score)"
-                                
+                                rankLabel.textColor = color
+                                self.honor()
                                 if matchedSquaresID.count == 6{
                                     entertainWinner()
                                 }
@@ -153,8 +169,17 @@ class ViewController: UIViewController {
         resetHighScore()
     }
     
+    @IBAction func didSwitchLevel(){
+        confirmRestart()
+        statusLabel.text = level == .hard ? "Try me!" : "Come on, coward!"
+    }
     
     
+    func adjustLevel(){
+        level = levelSwitch.isOn ? .hard : .easy
+       
+        setSquares()
+    }
     func randomizeColors() -> [UIColor] {
         let colors = [UIColor.black, UIColor.gray, UIColor.green, UIColor.yellow, UIColor.red, UIColor.red, UIColor.blue, UIColor.blue, UIColor.yellow, UIColor.black, UIColor.green, UIColor.gray]
         
@@ -176,11 +201,12 @@ class ViewController: UIViewController {
     func confirmRestart() {
         self.score = 0
         self.scoreLabel.text = "\(self.score)"
+        self.rankLabel.textColor = .label
         self.openedSquares.removeAll()
         self.scoredColors.removeAll()
         self.matchedSquaresID.removeAll()
         self.levelCombo.removeAll()
-        self.setSquares()
+        self.adjustLevel()
         for square in self.squares {
             square.button.backgroundColor = UIColor.white
         }
@@ -204,14 +230,55 @@ class ViewController: UIViewController {
         }
     }
     
-    func setHighScore(trials: Int){
+    func setHighScore(trials: Int, rank: String){
         let previousHighScore = UserDefaults.standard.integer(forKey: "highScore")
         let newHighScore = previousHighScore >= trials ? previousHighScore : trials
         UserDefaults.standard.set(newHighScore, forKey: "highScore")
+        UserDefaults.standard.set(rank, forKey: "playerRank")
     }
     
-    func retrieveHighScore() -> Int{
-        return UserDefaults.standard.integer(forKey: "highScore")
+    func retrieveHighScore() -> (Int, String){
+        let previousHighScore = UserDefaults.standard.integer(forKey: "highScore")
+        let previousRank = UserDefaults.standard.string(forKey: "playerRank") ?? Rank.noob.rawValue
+        return (previousHighScore, previousRank)
+        
+    }
+    
+    func honor(){
+        print("Level = \(level == .hard ? "Hard" : "Easy")")
+        if score == 10 && trials < (level == .hard ? hardMode[0] : easyMode[0]){
+            rank = Rank.subltnt.rawValue
+            rankLabel.text = "Just became \(rank) 🎖️"
+        }else if score == 20 && trials < (level == .hard ? hardMode[1] : easyMode[1]){
+            rank = Rank.ltnt.rawValue
+            rankLabel.text = "Just became \(rank) 🎖️"
+        }else if score == 30 && trials < (level == .hard ? hardMode[2] : easyMode[2]){
+            rank = Rank.ltntcmd.rawValue
+            rankLabel.text = "Just became \(rank) 🎖️"
+        }else if score == 40 && trials < (level == .hard ? hardMode[3] : easyMode[3]){
+            rank = Rank.cmd.rawValue
+            rankLabel.text = "Just became \(rank) 🎖️"
+        }else if score == 50 && trials < (level == .hard ? hardMode[4] : easyMode[4]){
+            rank =  Rank.capt.rawValue
+            rankLabel.text = "Just became \(rank) 🎖️"
+        }else if score == 60 && trials < (level == .hard ? hardMode[5] : easyMode[5]){
+            rank = Rank.admrl.rawValue
+            rankLabel.text = "Just became \(rank) 🎖️"
+        }
+        else if score == 60 && trials < (level == .hard ? hardMode[6] : easyMode[6]){
+            rank = Rank.vcadmrl.rawValue
+            rankLabel.text = "Just became \(rank) 🎖️"
+        }else if score == 60 && trials < (level == .hard ? hardMode[7] : easyMode[7]){
+            rank = Rank.rradmrl.rawValue
+            rankLabel.text = "Just became \(rank) 🎖️"
+        }
+        else if score == 60 && trials < (level == .hard ? hardMode[8] : easyMode[8]){
+            rank = Rank.cmmdr.rawValue
+            rankLabel.text = "Just became \(rank) 🎖️"
+        }
+        
+        statusLabel.text = "Chop Chop, \(rank)! You tried \(trials) times."
+       
     }
     
     func resetHighScore(){
@@ -220,7 +287,9 @@ class ViewController: UIViewController {
             let restartAlert = UIAlertController(title: "Are you sure?", message: "Tap Yes if you want reset your High Score.", preferredStyle: .alert)
             let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
                 UserDefaults.standard.set(0, forKey: "highScore")
+                UserDefaults.standard.set(Rank.kid.rawValue, forKey: "playerRank")
                 self.highScoreLabel.text = "\(UserDefaults.standard.integer(forKey: "highSchool"))"
+                self.rank = UserDefaults.standard.string(forKey: "playerRank") ?? Rank.noob.rawValue
             }
             
             let noAction = UIAlertAction(title: "No", style: .cancel)
@@ -231,8 +300,6 @@ class ViewController: UIViewController {
             self.present(restartAlert, animated: true)
         }
     }
-    
-    
     
 }
 
@@ -247,4 +314,24 @@ struct Square{
         self.color = color
         self.button = button
     }
+}
+
+enum Rank: String{
+    
+    case subltnt = " Sub-lieutenant"
+    case ltnt = " Lieutenant"
+    case ltntcmd = " Lieutenant commander"
+    case cmd = " Commander"
+    case capt = " Captain"
+    case admrl = " Admiral"
+    case vcadmrl = " Vice admiral"
+    case rradmrl = " Rear admiral"
+    case cmmdr = " Commodore"
+    case noob = " NOOB"
+    case kid = " Kid"
+}
+
+enum Level{
+    case easy
+    case hard
 }
