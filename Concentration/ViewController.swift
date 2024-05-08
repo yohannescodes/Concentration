@@ -11,6 +11,10 @@ class ViewController: UIViewController {
     
     
     @IBOutlet var buttons: [UIButton]!
+
+    @IBOutlet var resetHighScoreBtn: UIButton!
+    @IBOutlet var highScoreLabel: UILabel!
+
     
     @IBOutlet weak var scoreLabel: UILabel!
     
@@ -22,6 +26,7 @@ class ViewController: UIViewController {
     var openedSquares = [Square]()
     var scoredColors = [UIColor]()
     var matchedSquaresID = [(Int, Int)]()
+    var trials = 0
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -38,6 +43,8 @@ class ViewController: UIViewController {
     func setSquares(){
         restartBtn.tintColor = .black
         levelCombo = randomizeColors()
+        let highScore = UserDefaults.standard.integer(forKey: "highScore")
+        highScoreLabel.text = "\(highScore)"
         for i in 0...11{
             let square = Square(id: i, color: levelCombo[i], button: buttons[i])
             square.button.layer.borderColor = UIColor.black.cgColor
@@ -47,22 +54,22 @@ class ViewController: UIViewController {
     }
     
     
-    func checkIfMatched(){
-        print("Opened: \(openedSquares.count)")
-        print("Matched: \(matchedSquaresID.count)")
-        
-        if matchedSquaresID.count == 6{
-            DispatchQueue.main.async{
-                let alert = UIAlertController(title: "Woooo 🏆", message: "You scored 60/60.", preferredStyle: .alert)
-                let alertAction = UIAlertAction(title: "New Game", style: .default) { _ in
-                    self.confirmRestart()
-                }
+    func entertainWinner() {
+        self.setHighScore(trials: trials)
+        DispatchQueue.main.async{
+            let alert = UIAlertController(title: "Woooo 🏆", message: "You scored 60/60.", preferredStyle: .alert)
+            let alertAction = UIAlertAction(title: "New Game", style: .default) { _ in
                 
-                alert.addAction(alertAction)
-                self.present(alert, animated: true)
+                self.confirmRestart()
             }
-        }else {
             
+            alert.addAction(alertAction)
+            self.present(alert, animated: true)
+        }
+    }
+    
+    func checkIfMatched(){
+        
             if openedSquares.count > 2{
                 removeFirstOpenedSquare()
             }else if openedSquares.count == 2{
@@ -74,18 +81,19 @@ class ViewController: UIViewController {
                                 matchedSquaresID.append((id1, id2))
                                 score += 10
                                 scoreLabel.text = "\(score)"
-                                print("Opened: \(openedSquares.count)")
-                                print("Matched: \(matchedSquaresID.count)")
+                                
+                                if matchedSquaresID.count == 6{
+                                    entertainWinner()
+                                }
                             }
                         }
                     }
                     
                 }
                 removeFirstOpenedSquare()
-                print("Opened: \(openedSquares.count)")
             }
         }
-    }
+
     
     func removeFirstOpenedSquare(){
         openedSquares.first?.button.backgroundColor = UIColor.white
@@ -141,6 +149,10 @@ class ViewController: UIViewController {
         restartGame()
     }
     
+    @IBAction func didTapResetHighScore(){
+        resetHighScore()
+    }
+    
     
     
     func randomizeColors() -> [UIColor] {
@@ -153,6 +165,7 @@ class ViewController: UIViewController {
     func flipColor(square: Square){
         square.button.backgroundColor = square.color
         openedSquares.append(square)
+        trials += 1
         resetSquares(squares: squares)
     }
     
@@ -167,10 +180,11 @@ class ViewController: UIViewController {
         self.scoredColors.removeAll()
         self.matchedSquaresID.removeAll()
         self.levelCombo.removeAll()
+        self.setSquares()
         for square in self.squares {
             square.button.backgroundColor = UIColor.white
         }
-        self.setSquares()
+        trials = 0
     }
     
     func restartGame(){
@@ -189,6 +203,22 @@ class ViewController: UIViewController {
             self.present(restartAlert, animated: true)
         }
     }
+    
+    func setHighScore(trials: Int){
+        let previousHighScore = UserDefaults.standard.integer(forKey: "highScore")
+        let newHighScore = previousHighScore >= trials ? previousHighScore : trials
+        UserDefaults.standard.set(newHighScore, forKey: "highScore")
+    }
+    
+    func retrieveHighScore() -> Int{
+        return UserDefaults.standard.integer(forKey: "highScore")
+    }
+    
+    func resetHighScore(){
+        UserDefaults.standard.set(0, forKey: "highScore")
+    }
+    
+    
     
 }
 
