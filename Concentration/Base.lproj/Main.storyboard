@@ -17,6 +17,35 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Vta-js-aRJ" userLabel="HighScoreStack">
+                                <rect key="frame" x="15" y="63" width="180" height="30"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="HIGH SCORE:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c30-Nv-xfZ">
+                                        <rect key="frame" x="0.0" y="0.0" width="105" height="30"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MEs-h1-AKo">
+                                        <rect key="frame" x="105" y="0.0" width="54" height="30"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="restart.circle.fill" catalog="system"/>
+                                        <connections>
+                                            <action selector="didTapResetHighScore" destination="BYZ-38-t0r" eventType="touchUpInside" id="Han-pD-08d"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="e3h-Hs-Keg">
+                                        <rect key="frame" x="159" y="0.0" width="21" height="30"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="HBW-Lw-a9T"/>
+                                    <constraint firstAttribute="width" constant="180" id="NQr-kG-A5h"/>
+                                </constraints>
+                            </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="UCX-Z4-iMQ" userLabel="Parent">
                                 <rect key="frame" x="10" y="117" width="394" height="490"/>
                                 <subviews>
@@ -155,10 +184,10 @@
                                 </constraints>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="3" translatesAutoresizingMaskIntoConstraints="NO" id="wal-lN-y5k" userLabel="ScoreStack">
-                                <rect key="frame" x="284" y="73" width="110" height="34"/>
+                                <rect key="frame" x="289" y="63" width="110" height="30"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RFe-nA-vJT">
-                                        <rect key="frame" x="0.0" y="0.0" width="57.5" height="34"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="57.5" height="30"/>
                                         <attributedString key="attributedText">
                                             <fragment content="Score: ">
                                                 <attributes>
@@ -170,7 +199,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="u0M-hP-btI">
-                                        <rect key="frame" x="60.5" y="0.0" width="10.5" height="34"/>
+                                        <rect key="frame" x="60.5" y="0.0" width="10.5" height="30"/>
                                         <attributedString key="attributedText">
                                             <fragment content="0">
                                                 <attributes>
@@ -182,7 +211,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qQ7-OQ-mt0">
-                                        <rect key="frame" x="74" y="0.0" width="36" height="34"/>
+                                        <rect key="frame" x="74" y="0.0" width="36" height="30"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" image="restart.circle" catalog="system"/>
                                         <connections>
@@ -191,30 +220,26 @@
                                     </button>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="mlS-2M-SjN"/>
                                     <constraint firstAttribute="width" constant="110" id="vbP-qK-T5r"/>
                                 </constraints>
                             </stackView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Los-Iz-mrS">
-                                <rect key="frame" x="120" y="752" width="174" height="120"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="120" id="20f-Qq-CwC"/>
-                                </constraints>
-                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="Vta-js-aRJ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="15" id="7e4-RB-qy0"/>
+                            <constraint firstItem="Vta-js-aRJ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="15" id="Brt-GM-3dA"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="UCX-Z4-iMQ" secondAttribute="trailing" constant="10" id="LsI-hZ-7VT"/>
-                            <constraint firstItem="Los-Iz-mrS" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="120" id="RTE-MS-0NS"/>
-                            <constraint firstItem="UCX-Z4-iMQ" firstAttribute="top" secondItem="wal-lN-y5k" secondAttribute="bottom" constant="10" id="TNq-EU-GDm"/>
-                            <constraint firstItem="wal-lN-y5k" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="25" id="Wei-6u-TB1"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="wal-lN-y5k" secondAttribute="trailing" constant="20" id="m6r-Zh-LJu"/>
+                            <constraint firstItem="wal-lN-y5k" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="15" id="Wei-6u-TB1"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="wal-lN-y5k" secondAttribute="trailing" constant="15" id="m6r-Zh-LJu"/>
                             <constraint firstItem="UCX-Z4-iMQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="map-UX-yyY"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Los-Iz-mrS" secondAttribute="trailing" constant="120" id="r5G-ww-ZWi"/>
-                            <constraint firstItem="Los-Iz-mrS" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" constant="10" id="uIU-8H-MiS"/>
+                            <constraint firstItem="UCX-Z4-iMQ" firstAttribute="top" secondItem="wal-lN-y5k" secondAttribute="bottom" constant="24" id="mxk-O0-PeH"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="highScoreLabel" destination="e3h-Hs-Keg" id="Xbk-2D-4bl"/>
+                        <outlet property="resetHighScoreBtn" destination="MEs-h1-AKo" id="oSx-A2-esv"/>
                         <outlet property="restartBtn" destination="qQ7-OQ-mt0" id="oQl-Z0-7Gh"/>
                         <outlet property="scoreLabel" destination="u0M-hP-btI" id="hhh-DS-1vK"/>
                         <outletCollection property="buttons" destination="WaY-iD-IdL" collectionClass="NSMutableArray" id="PXy-Ec-kof"/>
@@ -238,6 +263,7 @@
     </scenes>
     <resources>
         <image name="restart.circle" catalog="system" width="128" height="123"/>
+        <image name="restart.circle.fill" catalog="system" width="128" height="123"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
