@@ -215,7 +215,21 @@ class ViewController: UIViewController {
     }
     
     func resetHighScore(){
-        UserDefaults.standard.set(0, forKey: "highScore")
+        DispatchQueue.main.async{
+            
+            let restartAlert = UIAlertController(title: "Are you sure?", message: "Tap Yes if you want reset your High Score.", preferredStyle: .alert)
+            let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
+                UserDefaults.standard.set(0, forKey: "highScore")
+                self.highScoreLabel.text = "\(UserDefaults.standard.integer(forKey: "highSchool"))"
+            }
+            
+            let noAction = UIAlertAction(title: "No", style: .cancel)
+            
+            restartAlert.addAction(yesAction)
+            restartAlert.addAction(noAction)
+            
+            self.present(restartAlert, animated: true)
+        }
     }
     
     
