@@ -35,15 +35,12 @@ class ViewController: UIViewController {
     var highScore = 0
     var rank = ""
     var level =  Level.easy
+    let phrases = ["Impressive 🙃", "Did you get it?", "Keep on!", "Promising", "Don't disappint the nation!", "Loving it 🔥"]
     
     let hardMode = [3, 5, 11, 15, 17, 13, 16, 20, 27]
     let easyMode = [6, 12, 26, 36, 42, 36, 44, 54, 70]
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        levelCombo = self.randomizeColors()
-    }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         adjustLevel()
@@ -51,7 +48,7 @@ class ViewController: UIViewController {
     
     
     func setSquares(){
-        statusLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        statusLabel.font = .systemFont(ofSize: 17, weight: .thin)
         statusLabel.numberOfLines = 0
         statusLabel.textAlignment = .left
         statusLabel.text = "By the King's decree, let the trial of skill commence!"
@@ -70,11 +67,15 @@ class ViewController: UIViewController {
     
     
     func entertainWinner() {
-        self.setHighScore(trials: trials, rank: rank)
+        self.setHighScore(trials: trials)
+        
+        
+        
         DispatchQueue.main.async{
             let alert = UIAlertController(title: "Woooo 🏆", message: "Congratulations, \(self.rank) you scored 60/60.", preferredStyle: .alert)
             let alertAction = UIAlertAction(title: "New Game", style: .default) { _ in
-                
+                let newerHighScore = self.retrieveHighScore()
+                self.highScoreLabel.text = "\(newerHighScore)"
                 self.confirmRestart()
             }
             
@@ -177,8 +178,9 @@ class ViewController: UIViewController {
     
     func adjustLevel(){
         level = levelSwitch.isOn ? .hard : .easy
-       
+        self.rankLabel.text = "Spicing Things Up 🌶️"
         setSquares()
+        
     }
     func randomizeColors() -> [UIColor] {
         let colors = [UIColor.black, UIColor.gray, UIColor.green, UIColor.yellow, UIColor.red, UIColor.red, UIColor.blue, UIColor.blue, UIColor.yellow, UIColor.black, UIColor.green, UIColor.gray]
@@ -188,6 +190,8 @@ class ViewController: UIViewController {
     }
     
     func flipColor(square: Square){
+        let now = Int.random(in: 0...4)
+        rankLabel.text = phrases[now]
         square.button.backgroundColor = square.color
         openedSquares.append(square)
         trials += 1
@@ -230,22 +234,21 @@ class ViewController: UIViewController {
         }
     }
     
-    func setHighScore(trials: Int, rank: String){
+    func setHighScore(trials: Int){
         let previousHighScore = UserDefaults.standard.integer(forKey: "highScore")
-        let newHighScore = previousHighScore >= trials ? previousHighScore : trials
+        let newHighScore = previousHighScore > trials ? trials : previousHighScore
         UserDefaults.standard.set(newHighScore, forKey: "highScore")
-        UserDefaults.standard.set(rank, forKey: "playerRank")
     }
     
-    func retrieveHighScore() -> (Int, String){
+    func retrieveHighScore() -> Int{
         let previousHighScore = UserDefaults.standard.integer(forKey: "highScore")
-        let previousRank = UserDefaults.standard.string(forKey: "playerRank") ?? Rank.noob.rawValue
-        return (previousHighScore, previousRank)
+        return previousHighScore
         
     }
     
     func honor(){
         print("Level = \(level == .hard ? "Hard" : "Easy")")
+        rankLabel.text = "Analyzing if you have leveled up yet! 🤔"
         if score == 10 && trials < (level == .hard ? hardMode[0] : easyMode[0]){
             rank = Rank.subltnt.rawValue
             rankLabel.text = "Just became \(rank) 🎖️"

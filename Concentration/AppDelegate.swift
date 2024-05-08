@@ -14,6 +14,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        // -applicationDidFinishLaunching:
+       
+        // to check it:
+        if UserDefaults.standard.bool(forKey: "firstLaunch"){
+            UserDefaults.standard.setValue(Rank.noob.rawValue, forKey: "playerRank")
+            UserDefaults.standard.setValue(0, forKey: "highScore")
+        }
+        UserDefaults.standard.register(defaults: ["firstLaunch":false])
         return true
     }
 
