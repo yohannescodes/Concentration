@@ -36,6 +36,7 @@ class ViewController: UIViewController {
     
     
     func setSquares(){
+        restartBtn.tintColor = .black
         levelCombo = randomizeColors()
         for i in 0...11{
             let square = Square(id: i, color: levelCombo[i], button: buttons[i])
@@ -50,7 +51,18 @@ class ViewController: UIViewController {
         print("Opened: \(openedSquares.count)")
         print("Matched: \(matchedSquaresID.count)")
         
-        if matchedSquaresID.count < 6{
+        if matchedSquaresID.count == 6{
+            DispatchQueue.main.async{
+                let alert = UIAlertController(title: "Woooo 🏆", message: "You scored 60/60.", preferredStyle: .alert)
+                let alertAction = UIAlertAction(title: "New Game", style: .default) { _ in
+                    self.confirmRestart()
+                }
+                
+                alert.addAction(alertAction)
+                self.present(alert, animated: true)
+            }
+        }else {
+            
             if openedSquares.count > 2{
                 removeFirstOpenedSquare()
             }else if openedSquares.count == 2{
@@ -72,14 +84,7 @@ class ViewController: UIViewController {
                 removeFirstOpenedSquare()
                 print("Opened: \(openedSquares.count)")
             }
-        }else{
-            DispatchQueue.main.async{
-                let alert = UIAlertController(title: "Woooo 🏆", message: "You scored 60/60.", preferredStyle: .alert)
-                let alertAction = UIAlertAction(title: "Ok", style: .cancel)
-                
-                alert.addAction(alertAction)
-                self.present(alert, animated: true)
-            }}
+        }
     }
     
     func removeFirstOpenedSquare(){
@@ -155,22 +160,25 @@ class ViewController: UIViewController {
         self.checkIfMatched()
     }
     
+    func confirmRestart() {
+        self.score = 0
+        self.scoreLabel.text = "\(self.score)"
+        self.openedSquares.removeAll()
+        self.scoredColors.removeAll()
+        self.matchedSquaresID.removeAll()
+        self.levelCombo.removeAll()
+        for square in self.squares {
+            square.button.backgroundColor = UIColor.white
+        }
+        self.setSquares()
+    }
+    
     func restartGame(){
         
         DispatchQueue.main.async{
             let restartAlert = UIAlertController(title: "Are you sure?", message: "Tap Yes if you want restart the game.", preferredStyle: .alert)
             let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
-                self.score = 0
-                self.scoreLabel.text = "\(self.score)"
-                self.openedSquares.removeAll()
-                self.scoredColors.removeAll()
-                self.matchedSquaresID.removeAll()
-                self.levelCombo.removeAll()
-                for square in self.squares {
-                    square.button.backgroundColor = UIColor.white
-                }
-                self.setSquares()
-                
+                self.confirmRestart()
             }
             
             let noAction = UIAlertAction(title: "No", style: .cancel)

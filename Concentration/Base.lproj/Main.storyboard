@@ -194,15 +194,24 @@
                                     <constraint firstAttribute="width" constant="110" id="vbP-qK-T5r"/>
                                 </constraints>
                             </stackView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Los-Iz-mrS">
+                                <rect key="frame" x="120" y="752" width="174" height="120"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="120" id="20f-Qq-CwC"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="UCX-Z4-iMQ" secondAttribute="trailing" constant="10" id="LsI-hZ-7VT"/>
+                            <constraint firstItem="Los-Iz-mrS" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="120" id="RTE-MS-0NS"/>
                             <constraint firstItem="UCX-Z4-iMQ" firstAttribute="top" secondItem="wal-lN-y5k" secondAttribute="bottom" constant="10" id="TNq-EU-GDm"/>
                             <constraint firstItem="wal-lN-y5k" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="25" id="Wei-6u-TB1"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="wal-lN-y5k" secondAttribute="trailing" constant="20" id="m6r-Zh-LJu"/>
                             <constraint firstItem="UCX-Z4-iMQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="map-UX-yyY"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Los-Iz-mrS" secondAttribute="trailing" constant="120" id="r5G-ww-ZWi"/>
+                            <constraint firstItem="Los-Iz-mrS" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" constant="10" id="uIU-8H-MiS"/>
                         </constraints>
                     </view>
                     <connections>
