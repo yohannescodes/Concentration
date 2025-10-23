@@ -7,334 +7,313 @@
 
 import UIKit
 
-class ViewController: UIViewController {
-    
-    
-    @IBOutlet var buttons: [UIButton]!
+final class ViewController: UIViewController {
 
-    @IBOutlet var resetHighScoreBtn: UIButton!
-    @IBOutlet var highScoreLabel: UILabel!
+    // MARK: - Outlets
 
-    
-    @IBOutlet weak var scoreLabel: UILabel!
-    
-    @IBOutlet weak var restartBtn: UIButton!
-    
-    @IBOutlet weak var statusLabel: UILabel!
-    @IBOutlet weak var rankLabel: UILabel!
-    
-    @IBOutlet weak var levelSwitch: UISwitch!
-    
-    var score = 0
-    var levelCombo = [UIColor]()
-    var squares = [Square]()
-    var openedSquares = [Square]()
-    var scoredColors = [UIColor]()
-    var matchedSquaresID = [(Int, Int)]()
-    var trials = 0
-    var highScore = 0
-    var rank = ""
-    var level =  Level.easy
-    let phrases = ["Impressive 🙃", "Did you get it?", "Keep on!", "Promising", "Don't disappint the nation!", "Loving it 🔥"]
-    
-    let hardMode = [3, 5, 11, 15, 17, 13, 16, 20, 27]
-    let easyMode = [6, 12, 26, 36, 42, 36, 44, 54, 70]
-    
+    @IBOutlet private var buttons: [UIButton]!
+    @IBOutlet private var resetHighScoreBtn: UIButton!
+    @IBOutlet private var highScoreLabel: UILabel!
+    @IBOutlet private weak var scoreLabel: UILabel!
+    @IBOutlet private weak var restartBtn: UIButton!
+    @IBOutlet private weak var statusLabel: UILabel!
+    @IBOutlet private weak var rankLabel: UILabel!
+    @IBOutlet private weak var levelSwitch: UISwitch!
+
+    // MARK: - Properties
+
+    private let phrases = [
+        "Impressive 🙃",
+        "Did you get it?",
+        "Keep on!",
+        "Promising",
+        "Don't disappint the nation!",
+        "Loving it 🔥"
+    ]
+
+    private var game = GameSession()
+    private var highScore = 0
+    private var isBoardLocked = false
+
+    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        adjustLevel()
+        configureStatusLabel()
+        startGame()
     }
-    
-    
-    func setSquares(){
+
+    // MARK: - Actions
+
+    @IBAction private func button1Flipped() {
+        handleFlip(at: 0)
+    }
+
+    @IBAction private func button2Flipped() {
+        handleFlip(at: 1)
+    }
+
+    @IBAction private func button3Flipped() {
+        handleFlip(at: 2)
+    }
+
+    @IBAction private func button4Flipped() {
+        handleFlip(at: 3)
+    }
+
+    @IBAction private func button5Flipped() {
+        handleFlip(at: 4)
+    }
+
+    @IBAction private func button6Flipped() {
+        handleFlip(at: 5)
+    }
+
+    @IBAction private func button7Flipped() {
+        handleFlip(at: 6)
+    }
+
+    @IBAction private func button8Flipped() {
+        handleFlip(at: 7)
+    }
+
+    @IBAction private func button9Flipped() {
+        handleFlip(at: 8)
+    }
+
+    @IBAction private func button10Flipped() {
+        handleFlip(at: 9)
+    }
+
+    @IBAction private func button11Flipped() {
+        handleFlip(at: 10)
+    }
+
+    @IBAction private func button12Flipped() {
+        handleFlip(at: 11)
+    }
+
+    @IBAction private func didTapRestart() {
+        restartGame()
+    }
+
+    @IBAction private func didTapResetHighScore() {
+        resetHighScore()
+    }
+
+    @IBAction private func didSwitchLevel() {
+        confirmRestart()
+        statusLabel.text = levelSwitch.isOn ? "Try me!" : "Come on, coward!"
+    }
+
+    // MARK: - Setup
+
+    private func configureStatusLabel() {
         statusLabel.font = .systemFont(ofSize: 17, weight: .thin)
         statusLabel.numberOfLines = 0
         statusLabel.textAlignment = .left
-        statusLabel.text = "By the King's decree, let the trial of skill commence!"
-        rank = highScore > 0 ? Rank.kid.rawValue : Rank.noob.rawValue
-        restartBtn.tintColor = .black
-        levelCombo = randomizeColors()
-        highScore = UserDefaults.standard.integer(forKey: "highScore")
+    }
+
+    private func startGame() {
+        isBoardLocked = false
+        highScore = retrieveHighScore()
         highScoreLabel.text = "\(highScore)"
-        for i in 0...11{
-            let square = Square(id: i, color: levelCombo[i], button: buttons[i])
-            square.button.layer.borderColor = UIColor.black.cgColor
-            square.button.layer.borderWidth = 0.6
-            squares.append(square)
+
+        game.startNewGame(level: currentLevel())
+        let initialRank: Rank = highScore > 0 ? .kid : .noob
+        game.setInitialRank(initialRank)
+
+        rankLabel.text = initialRank.rawValue
+        rankLabel.textColor = .label
+        restartBtn.tintColor = .black
+
+        updateScoreLabel(with: 0)
+        updateStatus()
+        configureBoard()
+    }
+
+    private func configureBoard() {
+        statusLabel.text = "By the King's decree, let the trial of skill commence!"
+        for (index, button) in buttons.enumerated() {
+            button.tag = index
+            button.layer.borderColor = UIColor.black.cgColor
+            button.layer.borderWidth = 0.6
+            button.backgroundColor = .white
+            button.isEnabled = true
         }
     }
-    
-    
-    func entertainWinner() {
-        self.setHighScore(trials: trials)
-        
-        
-        
-        DispatchQueue.main.async{
-            let alert = UIAlertController(title: "Woooo 🏆", message: "Congratulations, \(self.rank) you scored 60/60.", preferredStyle: .alert)
+
+    private func currentLevel() -> Level {
+        levelSwitch.isOn ? .hard : .easy
+    }
+
+    // MARK: - Game Flow
+
+    private func handleFlip(at index: Int) {
+        guard !isBoardLocked, let color = game.tileColor(at: index), buttons.indices.contains(index) else {
+            return
+        }
+
+        buttons[index].backgroundColor = color
+        buttons[index].isEnabled = false
+        if let phrase = phrases.randomElement() {
+            rankLabel.text = phrase
+        }
+
+        let result = game.flipTile(at: index)
+        updateScoreLabel(with: result.score)
+        updateStatus()
+
+        if result.rankDidChange {
+            announceRankChange(with: result.matchedColor)
+        }
+
+        switch result.state {
+        case .awaitingSecondFlip:
+            break
+        case let .match(indices, didWin):
+            applyMatch(for: indices, color: result.matchedColor)
+            if didWin {
+                entertainWinner()
+            }
+        case let .mismatch(indices):
+            handleMismatch(for: indices)
+        case .ignored:
+            buttons[index].isEnabled = true
+        }
+    }
+
+    private func applyMatch(for indices: [Int], color: UIColor?) {
+        for index in indices where buttons.indices.contains(index) {
+            if let color {
+                buttons[index].backgroundColor = color
+            }
+            buttons[index].isEnabled = false
+        }
+
+        if let color {
+            rankLabel.textColor = color
+        }
+    }
+
+    private func handleMismatch(for indices: [Int]) {
+        isBoardLocked = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { [weak self] in
+            guard let self else { return }
+            for index in indices where self.buttons.indices.contains(index) {
+                self.buttons[index].backgroundColor = .white
+                self.buttons[index].isEnabled = true
+            }
+            self.isBoardLocked = false
+        }
+    }
+
+    private func announceRankChange(with color: UIColor?) {
+        rankLabel.text = "Just became \(game.rank.rawValue) 🎖️"
+        if let color {
+            rankLabel.textColor = color
+        }
+    }
+
+    private func updateScoreLabel(with score: Int) {
+        scoreLabel.text = "\(score)"
+    }
+
+    private func updateStatus() {
+        statusLabel.text = "Chop Chop, \(game.rank.rawValue)! You tried \(game.trials) times."
+    }
+
+    // MARK: - Alerts & Persistence
+
+    private func entertainWinner() {
+        setHighScore(trials: game.trials)
+
+        DispatchQueue.main.async {
+            let alert = UIAlertController(
+                title: "Woooo 🏆",
+                message: "Congratulations, \(self.game.rank.rawValue) you scored 60/60.",
+                preferredStyle: .alert
+            )
+
             let alertAction = UIAlertAction(title: "New Game", style: .default) { _ in
                 let newerHighScore = self.retrieveHighScore()
+                self.highScore = newerHighScore
                 self.highScoreLabel.text = "\(newerHighScore)"
                 self.confirmRestart()
             }
-            
+
             alert.addAction(alertAction)
             self.present(alert, animated: true)
         }
     }
-    
-    func checkIfMatched(){
-        
-            if openedSquares.count > 2{
-                removeFirstOpenedSquare()
-            }else if openedSquares.count == 2{
-                if openedSquares.first?.color == openedSquares.last?.color{
-                    if let color = openedSquares.first?.color{
-                        if !scoredColors.contains(color){
-                            if let id1 = openedSquares.first?.id, let id2 = openedSquares.last?.id {
-                                scoredColors.append(color)
-                                matchedSquaresID.append((id1, id2))
-                                score += 10
-                                scoreLabel.text = "\(score)"
-                                rankLabel.textColor = color
-                                self.honor()
-                                if matchedSquaresID.count == 6{
-                                    entertainWinner()
-                                }
-                            }
-                        }
-                    }
-                    
-                }
-                removeFirstOpenedSquare()
-            }
-        }
 
-    
-    func removeFirstOpenedSquare(){
-        openedSquares.first?.button.backgroundColor = UIColor.white
-        openedSquares.removeFirst()
-    }
-    
-    @IBAction func button1Flipped(){
-        flipColor(square: squares[0])
-    }
-    @IBAction func button2Flipped(){
-        flipColor(square: squares[1])
-    }
-    @IBAction func button3Flipped(){
-        flipColor(square: squares[2])
-    }
-    @IBAction func button4Flipped(){
-        flipColor(square: squares[3])
-        
-    }
-    @IBAction func button5Flipped(){
-        flipColor(square: squares[4])
-        
-    }
-    @IBAction func button6Flipped(){
-        flipColor(square: squares[5])
-        
-    }
-    @IBAction func button7Flipped(){
-        flipColor(square: squares[6])
-    }
-    
-    @IBAction func button8Flipped(){
-        flipColor(square: squares[7])
-    }
-    
-    @IBAction func button9Flipped(){
-        flipColor(square: squares[8])
-    }
-    
-    @IBAction func button10Flipped(){
-        flipColor(square: squares[9])
-    }
-    
-    @IBAction func button11Flipped(){
-        flipColor(square: squares[10])
-    }
-    
-    @IBAction func button12Flipped(){
-        flipColor(square: squares[11])
-    }
-    
-    @IBAction func didTapRestart(){
-        restartGame()
-    }
-    
-    @IBAction func didTapResetHighScore(){
-        resetHighScore()
-    }
-    
-    @IBAction func didSwitchLevel(){
-        confirmRestart()
-        statusLabel.text = level == .hard ? "Try me!" : "Come on, coward!"
-    }
-    
-    
-    func adjustLevel(){
-        level = levelSwitch.isOn ? .hard : .easy
-        self.rankLabel.text = "Spicing Things Up 🌶️"
-        setSquares()
-        
-    }
-    func randomizeColors() -> [UIColor] {
-        let colors = [UIColor.black, UIColor.gray, UIColor.green, UIColor.yellow, UIColor.red, UIColor.red, UIColor.blue, UIColor.blue, UIColor.yellow, UIColor.black, UIColor.green, UIColor.gray]
-        
-        let shuffledColors = colors.shuffled()
-        return shuffledColors
-    }
-    
-    func flipColor(square: Square){
-        let now = Int.random(in: 0...4)
-        rankLabel.text = phrases[now]
-        square.button.backgroundColor = square.color
-        openedSquares.append(square)
-        trials += 1
-        resetSquares(squares: squares)
-    }
-    
-    func resetSquares(squares: [Square]){
-        self.checkIfMatched()
-    }
-    
-    func confirmRestart() {
-        self.score = 0
-        self.scoreLabel.text = "\(self.score)"
-        self.rankLabel.textColor = .label
-        self.openedSquares.removeAll()
-        self.scoredColors.removeAll()
-        self.matchedSquaresID.removeAll()
-        self.levelCombo.removeAll()
-        self.adjustLevel()
-        for square in self.squares {
-            square.button.backgroundColor = UIColor.white
-        }
-        trials = 0
-    }
-    
-    func restartGame(){
-        
-        DispatchQueue.main.async{
-            let restartAlert = UIAlertController(title: "Are you sure?", message: "Tap Yes if you want restart the game.", preferredStyle: .alert)
+    private func restartGame() {
+        DispatchQueue.main.async {
+            let restartAlert = UIAlertController(
+                title: "Are you sure?",
+                message: "Tap Yes if you want restart the game.",
+                preferredStyle: .alert
+            )
+
             let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
                 self.confirmRestart()
             }
-            
+
             let noAction = UIAlertAction(title: "No", style: .cancel)
-            
+
             restartAlert.addAction(yesAction)
             restartAlert.addAction(noAction)
-            
+
             self.present(restartAlert, animated: true)
         }
     }
-    
-    func setHighScore(trials: Int){
+
+    private func setHighScore(trials: Int) {
         let previousHighScore = UserDefaults.standard.integer(forKey: "highScore")
-        let newHighScore = previousHighScore > trials ? trials : previousHighScore
+        let newHighScore: Int
+        if previousHighScore == 0 {
+            newHighScore = trials
+        } else {
+            newHighScore = min(previousHighScore, trials)
+        }
         UserDefaults.standard.set(newHighScore, forKey: "highScore")
     }
-    
-    func retrieveHighScore() -> Int{
-        let previousHighScore = UserDefaults.standard.integer(forKey: "highScore")
-        return previousHighScore
-        
+
+    private func retrieveHighScore() -> Int {
+        UserDefaults.standard.integer(forKey: "highScore")
     }
-    
-    func honor(){
-        print("Level = \(level == .hard ? "Hard" : "Easy")")
-        rankLabel.text = "Analyzing if you have leveled up yet! 🤔"
-        if score == 10 && trials < (level == .hard ? hardMode[0] : easyMode[0]){
-            rank = Rank.subltnt.rawValue
-            rankLabel.text = "Just became \(rank) 🎖️"
-        }else if score == 20 && trials < (level == .hard ? hardMode[1] : easyMode[1]){
-            rank = Rank.ltnt.rawValue
-            rankLabel.text = "Just became \(rank) 🎖️"
-        }else if score == 30 && trials < (level == .hard ? hardMode[2] : easyMode[2]){
-            rank = Rank.ltntcmd.rawValue
-            rankLabel.text = "Just became \(rank) 🎖️"
-        }else if score == 40 && trials < (level == .hard ? hardMode[3] : easyMode[3]){
-            rank = Rank.cmd.rawValue
-            rankLabel.text = "Just became \(rank) 🎖️"
-        }else if score == 50 && trials < (level == .hard ? hardMode[4] : easyMode[4]){
-            rank =  Rank.capt.rawValue
-            rankLabel.text = "Just became \(rank) 🎖️"
-        }else if score == 60 && trials < (level == .hard ? hardMode[5] : easyMode[5]){
-            rank = Rank.admrl.rawValue
-            rankLabel.text = "Just became \(rank) 🎖️"
-        }
-        else if score == 60 && trials < (level == .hard ? hardMode[6] : easyMode[6]){
-            rank = Rank.vcadmrl.rawValue
-            rankLabel.text = "Just became \(rank) 🎖️"
-        }else if score == 60 && trials < (level == .hard ? hardMode[7] : easyMode[7]){
-            rank = Rank.rradmrl.rawValue
-            rankLabel.text = "Just became \(rank) 🎖️"
-        }
-        else if score == 60 && trials < (level == .hard ? hardMode[8] : easyMode[8]){
-            rank = Rank.cmmdr.rawValue
-            rankLabel.text = "Just became \(rank) 🎖️"
-        }
-        
-        statusLabel.text = "Chop Chop, \(rank)! You tried \(trials) times."
-       
+
+    // MARK: - Game Controls
+
+    private func confirmRestart() {
+        startGame()
     }
-    
-    func resetHighScore(){
-        DispatchQueue.main.async{
-            
-            let restartAlert = UIAlertController(title: "Are you sure?", message: "Tap Yes if you want reset your High Score.", preferredStyle: .alert)
+
+    private func resetHighScore() {
+        DispatchQueue.main.async {
+            let restartAlert = UIAlertController(
+                title: "Are you sure?",
+                message: "Tap Yes if you want reset your High Score.",
+                preferredStyle: .alert
+            )
+
             let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
                 UserDefaults.standard.set(0, forKey: "highScore")
-                UserDefaults.standard.set(Rank.kid.rawValue, forKey: "playerRank")
-                self.highScoreLabel.text = "\(UserDefaults.standard.integer(forKey: "highSchool"))"
-                self.rank = UserDefaults.standard.string(forKey: "playerRank") ?? Rank.noob.rawValue
+                UserDefaults.standard.set(Rank.noob.rawValue, forKey: "playerRank")
+                self.highScore = 0
+                self.highScoreLabel.text = "0"
+                self.game.setInitialRank(.noob)
+                self.rankLabel.text = Rank.noob.rawValue
+                self.rankLabel.textColor = .label
+                self.updateStatus()
             }
-            
+
             let noAction = UIAlertAction(title: "No", style: .cancel)
-            
+
             restartAlert.addAction(yesAction)
             restartAlert.addAction(noAction)
-            
+
             self.present(restartAlert, animated: true)
         }
     }
-    
-}
-
-
-struct Square{
-    var id: Int
-    var color: UIColor
-    var button: UIButton
-    
-    init(id: Int, color: UIColor, button: UIButton) {
-        self.id = id
-        self.color = color
-        self.button = button
-    }
-}
-
-enum Rank: String{
-    
-    case subltnt = " Sub-lieutenant"
-    case ltnt = " Lieutenant"
-    case ltntcmd = " Lieutenant commander"
-    case cmd = " Commander"
-    case capt = " Captain"
-    case admrl = " Admiral"
-    case vcadmrl = " Vice admiral"
-    case rradmrl = " Rear admiral"
-    case cmmdr = " Commodore"
-    case noob = " NOOB"
-    case kid = " Kid"
-}
-
-enum Level{
-    case easy
-    case hard
 }
